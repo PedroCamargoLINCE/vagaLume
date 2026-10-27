@@ -15,6 +15,7 @@ from radar import requirements
     ("Cursando penúltimo ou último ano (ensino superior)", {"last": True, "unit": "ano"}),
     ("Estar cursando até o 4º semestre do curso superior", {"to": 4, "unit": "semestre"}),
     ("Disponibilidade para estagiar por no mínimo 1 ano", None),  # how long, not which year
+    ("Dobrou o número de colaboradores nos últimos anos. Cursando Administração", None),
     ("Atendimento a crianças de 3 a 10 anos", None),
     ("R$ 1.684,00 para o 1º e 2º anos e R$ 1.895,00 a partir do 3º ano", None),  # stipend by year
 ])
@@ -31,6 +32,8 @@ def test_semester(text, expected):
     ("ter a previsão de formatura a partir de 2027.2interesse", {"from": "2027-07"}),
     ("data de conclusão de curso igual ou posterior a 2028/2", {"from": "2028-07"}),
     ("tem previsão de formatura até o final de 2028?", {"to": "2028-12"}),
+    ("com formatura mínima prevista para 2028.2", {"from": "2028-07"}),
+    ("previsão de formatura, no mínimo, em 12/2027 (1 ano de contrato)", {"from": "2027-12"}),
     ("previsão de conclusão de curso para 2º semestre de 2028;", {"from": "2028-07", "to": "2028-12"}),
     ("A conclusão do curso não representa garantia de contratação em 2027", None),
 ])
@@ -45,6 +48,8 @@ def test_graduation(text, expected):
     ("Fluência em inglês (para turmas bilíngues)", {"level": "fluente", "required": True}),
     ("Cursando Pedagogia, Psicologia ou Letras Inglês", None),
     ("pacote office avançadoinglês será considerado um diferencial", None),  # "avançado" is Office's
+    ("Diferenciais (não obrigatórios) idiomas: inglês básico, intermediário ou avançado", {"level": "básico", "required": False}),
+    ("Cursando Direito entre o 3º e 7º semestre;Inglês avançado;Diferencial: espanhol.", {"level": "avançado", "required": True}),
 ])
 def test_english(text, expected):
     assert requirements.english(text) == expected
@@ -67,6 +72,8 @@ def test_hours(text, expected):
     ("Cursando Licenciatura ou Bacharelado em Física, a partir do 5º semestre", ["Física"]),
     ("Cursando ADMINISTRAÇÃO DE EMPRESAS, RECURSOS HUMANOSFormação prevista para 2027", ["ADMINISTRAÇÃO DE EMPRESAS", "RECURSOS HUMANOS"]),
     ("Cursando ensino superior", []),
+    ("Cursando faculdade nas áreas de Administração, Engenharia e afins;", ["Administração", "Engenharia"]),
+    ("Cursando técnico ou graduação em: Administração, Ciências Contábeis", ["Administração", "Ciências Contábeis"]),
 ])
 def test_courses(text, expected):
     assert requirements.courses(text) == expected

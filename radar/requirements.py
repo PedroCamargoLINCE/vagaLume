@@ -66,9 +66,10 @@ def semester(text: str) -> dict[str, Any] | None:
     match = re.search(rf"(?:cursando|estar|estudantes?|alunos?)[^.;\n]{{0,40}}\bate o\s*(?:{_ORD})\s*{_TERM}", t)
     if match and 1 <= (high := _ordinal(match[1], match[2])) <= 12 and (found := _sane({"to": high, "unit": match[3]}, match)):
         return found
-    last = re.search(r"\b(?:penultimo|ultimo)s? (?:ou ultimo )?(ano|semestre|periodo)", t)
-    if last and re.search(r"cursando|estudante|graduac|curso", t):
-        return {"last": True, "unit": last[1]}
+    # "penúltimo ou último ano (ensino superior)", not "dobrou de tamanho nos últimos anos"
+    for last in re.finditer(r"\b(?:penultimo|ultimo) (?:ou ultimo )?(ano|semestre|periodo)\b", t):
+        if re.search(r"cursando|estudante|graduac|curso|matricul|faculdade", t[max(0, last.start() - 80):last.end() + 40]):
+            return {"last": True, "unit": last[1]}
     return None
 
 
@@ -106,7 +107,8 @@ def graduation(text: str) -> dict[str, str] | None:
         between = re.search(rf"(?:entre|de|no|em)?\s*{_WHEN}\s*(?:e|a|ate o|ate|-|–)\s*(?:o\s*)?{_WHEN_B}", part)
         if between:
             return {"from": _span(between)[0], "to": _span(between, "_b")[1]}
-        after = (re.search(rf"(?:a partir d[eo]|apos|depois de|nao antes de|igual ou posterior a|posterior a)\s*(?:o\s*)?{_WHEN}", part)
+        after = (re.search(rf"(?:a partir d[eo]|apos|depois de|nao antes de|igual ou posterior a|posterior a|(?:no )?minimo,?\s*(?:em|para|de)?)\s*(?:o\s*)?{_WHEN}", part)
+                 or re.search(rf"minima\s*(?:prevista\s*)?(?:para|em|de)\s*{_WHEN}", part)
                  or re.search(rf"{_WHEN}\s*(?:em diante|ou apos|ou depois|ou posterior)", part))
         if after:
             return {"from": _span(after)[0]}
@@ -123,7 +125,7 @@ def graduation(text: str) -> dict[str, str] | None:
 _LEVELS = {"basico": "básico", "intermediario": "intermediário", "avancado": "avançado", "fluente": "fluente",
            "fluencia": "fluente", "tecnico": "técnico", "leitura": "leitura"}
 _LEVEL = r"(basico|intermediario|avancado|fluente|fluencia|tecnico|leitura)"
-_WISH = re.compile(r"desejavel|diferencial|preferencial|desejaveis|sera um plus|nice to have|bonus")
+_WISH = re.compile(r"desejave(?:l|is)|diferencia(?:l|is)|preferencia(?:l|lmente)|nao obrigatori|sera um plus|nice to have|bonus")
 
 
 def english(text: str) -> dict[str, Any] | None:
@@ -136,7 +138,8 @@ def english(text: str) -> dict[str, Any] | None:
             continue
         word = match[1] or match[2] or ("fluente" if "fluencia" in match[0] else "avançado")
         clause = re.split(r"[;\n•]|\.\s", t[max(0, match.start() - 80):match.start()])[-1]
-        return {"level": _LEVELS.get(word, word), "required": not _WISH.search(clause + " " + t[match.end():match.end() + 40])}
+        after = re.split(r"[;\n•]|\.\s?|,\s", t[match.end():match.end() + 40])[0]  # "inglês avançado; diferencial: espanhol"
+        return {"level": _LEVELS.get(word, word), "required": not _WISH.search(clause + " " + after)}
     return None
 
 
@@ -156,7 +159,7 @@ _COURSE_STOP = re.compile(
     r"\s*(?:,\s*)?(?:a partir|com previs|preferencial|que esteja|do \d|entre o|no \d|em qualquer|cursando|matriculad|"
     r"com disponibilidade|disponibilidade|e ter|ter |que |para |estar |com conhecimento|conhecimento|com |\(|\d)",
     re.I)
-_COURSE_LEAD = re.compile(r"^(?:o curso de|os cursos de|cursos? de|cursos? superior(?:es)? (?:de|em)|ensino superior(?: completo)?(?: em| de| nas seguintes areas:?| nos cursos de)?|"
+_COURSE_LEAD = re.compile(r"^(?:faculdade(?: nas areas de| em| de)?|(?:tecnico|tecnologo) ou graduacao(?: em)?:?|o curso de|os cursos de|cursos? de|cursos? superior(?:es)? (?:de|em)|ensino superior(?: completo)?(?: em| de| nas seguintes areas:?| nos cursos de)?|"
                           r"graduacao(?: em| de)?|bacharelado(?: em| de)?|licenciatura(?: em| de)?|superior(?: em| de)?|"
                           r"tecnologo(?: em)?|ensino tecnico em|tecnico em|uma das seguintes areas:?|areas? de|nas areas de|"
                           r"em|de|as seguintes areas:?)\s*", re.I)
@@ -183,7 +186,7 @@ def courses(text: str) -> list[str]:
         for part in re.split(r",|/|\bou\b|\be\b(?=\s+[A-ZÁÉÍÓÚÂÊÔÃÕÇ])", lead):
             name = re.sub(r"\s+(?:e|ou)$", "", part.strip(" :-–"))
             name = re.sub(r"^(?:bacharelado|licenciatura|tecnologo|graduacao|curso)\s+(?:em|de)\s+", "", name, flags=re.I)
-            name = re.sub(r"\s+(?:ou|e)\s+(?:areas?|cursos?)\s+(?:afins|correlat\w*|relacionad\w*).*$", "", name, flags=re.I)
+            name = re.sub(r"\s+(?:ou|e)\s+(?:(?:areas?|cursos?)\s+)?(?:afins|correlat\w*|relacionad\w*|similares).*$", "", name, flags=re.I)
             if 2 < len(name) <= 45 and not _NOT_COURSE.match(_plain(name)) and name[:1].isupper():
                 names.append(name)
         if names:

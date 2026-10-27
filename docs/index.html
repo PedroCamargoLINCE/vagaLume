@@ -774,6 +774,20 @@ const STRINGS = {
   "d.where": ["Where", "Onde"], "d.when": ["When", "Quando"], "d.deadline": ["Deadline", "Prazo"], "d.pay": ["Pay", "Remuneração"],
   "note.deloitte": ["Deloitte's career site refuses some visitors (\"406 Not Acceptable\"), often outside the US. If it happens, try another browser or network, or search for the role on deloitte.com.",
     "O site de vagas da Deloitte recusa alguns acessos (\"406 Not Acceptable\"), muitas vezes de fora dos EUA. Se acontecer, tente outro navegador ou outra rede, ou procure a vaga em deloitte.com."],
+  "d.req": ["Asks for", "Requisitos"],
+  "d.reqNote": ["read from the posting's text; check them on its page", "lidos do texto da vaga; confira na página"],
+  "req.from": [(n, u) => `from the ${n}${ordEn(n)} ${u}`, (n, u) => `a partir do ${n}º ${u}`],
+  "req.range": [(a, b, u) => `${a}${ordEn(a)} to ${b}${ordEn(b)} ${u}`, (a, b, u) => `do ${a}º ao ${b}º ${u}`],
+  "req.upTo": [(n, u) => `up to the ${n}${ordEn(n)} ${u}`, (n, u) => `até o ${n}º ${u}`],
+  "req.last": [u => `last or second-to-last ${u}`, u => `penúltimo ou último ${u}`],
+  "req.unit.semestre": ["semester", "semestre"], "req.unit.periodo": ["term", "período"], "req.unit.ano": ["year", "ano"], "req.unit.modulo": ["module", "módulo"],
+  "req.grad": [(a, b) => a && b ? `graduating between ${a} and ${b}` : a ? `graduating ${a} or later` : `graduating by ${b}`,
+    (a, b) => a && b ? `formatura entre ${a} e ${b}` : a ? `formatura a partir de ${a}` : `formatura até ${b}`],
+  "req.english": [(l, needed) => `English: ${l}${needed ? "" : " (nice to have)"}`, (l, needed) => `inglês ${l}${needed ? "" : " (desejável)"}`],
+  "req.level.básico": ["basic", "básico"], "req.level.intermediário": ["intermediate", "intermediário"], "req.level.avançado": ["advanced", "avançado"],
+  "req.level.fluente": ["fluent", "fluente"], "req.level.técnico": ["technical", "técnico"], "req.level.leitura": ["reading", "para leitura"],
+  "req.hours": [h => `${h} h a week`, h => `${h} h por semana`],
+  "req.courses": [c => `courses: ${c}`, c => `cursos: ${c}`],
   "d.labels": ["Labels", "Rótulos"], "d.alts": ["Same role, other places", "A mesma vaga em outros lugares"], "d.found": ["Found", "Encontrada em"], "d.notStated": ["Not stated", "Não informado"],
   "d.deadlineNone": ["Not stated. Check the posting.", "Não informado. Veja a vaga."],
   "d.foundVia": [(d, s, p) => `${d} via ${s}${p ? ` · posted ${p}` : ""}`, (d, s, p) => `${d} via ${s}${p ? ` · publicada em ${p}` : ""}`],
@@ -807,6 +821,7 @@ const STRINGS = {
   "r.yourField": [f => `In an area you're looking for (${f})`, f => `Numa área que você procura (${f})`],
   "r.relatedField": [f => `In a related area (${f})`, f => `Numa área próxima (${f})`],
   "r.otherField": [f => `A ${f} role, outside your areas`, f => `Vaga de ${f}, fora das suas áreas`],
+  "r.probField": [f => `Probably a ${f} role, judging by the title`, f => `Provavelmente uma vaga de ${f}, pelo título`],
   "r.otherLevel": [l => `For another level: ${l}`, l => `Para outro nível: ${l}`],
   "r.otherPlace": [w => `Outside where you'd work: ${w}`, w => `Fora de onde você toparia trabalhar: ${w}`],
   "r.portuguese": ["The posting is in Portuguese", "A vaga é em português"],
@@ -919,6 +934,7 @@ function t(key, ...args) {
 }
 const tv = (kind, value) => STRINGS[`${kind}.${value}`] ? t(`${kind}.${value}`) : value;  // a data value -> its name
 const fmtN = n => Number(n).toLocaleString(LOCALE());
+const ordEn = n => (n % 100 >= 11 && n % 100 <= 13) ? "th" : ({ 1: "st", 2: "nd", 3: "rd" })[n % 10] || "th";
 // "45 sources": counted from data.json, so the welcome text never goes stale; "dozens of" until it loads.
 const sourceCount = word => DATA?.sources?.length ? `${DATA.sources.length} ${word}` : (LANG === "pt" ? `dezenas de ${word}` : `dozens of ${word}`);
 
@@ -1010,7 +1026,7 @@ const SEMESTER = new Set([3, 4, 5, 6, 8, 9, 10, 11]);  // the usual Brazilian se
 // ------------------------------------------------------------------ state
 let DATA = null;
 const ITEM_DEFAULTS = { location: "", warnings: [], deadline: "", pay: "", skills: [], fields: [], levels: [], states: [],
-  workplaces: [], subs: [], posted: "", note: "", season: "unknown", area: "other", status: "seen" };
+  workplaces: [], subs: [], req: {}, guess: [], posted: "", note: "", season: "unknown", area: "other", status: "seen" };
 // {levels, fields, places, home, work} or {skipped: true}. Older profiles had one
 // level/field/place each; normalizeProfile turns them into lists.
 // Profiles from before "where would you work" have no `work`: they keep seeing every place.
@@ -1311,6 +1327,13 @@ function computeFit(item) {
     else if (fields.some(f => related.has(f))) { fieldRank = 1; add(0, t("r.relatedField", fieldNames(fields))); }
     // "Outra" among your fields means a role for another field may still be yours: nothing is hidden.
     else if (!profile.fields.includes("outra")) { otherField = true; add(2, t("r.otherField", fieldNames(fields))); }
+  } else if (mineF.length && item.guess.length) {
+    // No field from the rules, a probable one from similar titles (radar/area_guess.py, about 4 in 5 right):
+    // it only moves the role up for students of that field; nothing is hidden by it.
+    const related = new Set(mineF.flatMap(f => FIELD_RELATED[f] || []));
+    const yours = item.guess.filter(f => mineF.includes(f));
+    if (yours.length) { fieldRank = 0.5; add(0, t("r.probField", fieldNames(yours))); }
+    else if (item.guess.some(f => related.has(f))) fieldRank = 1.5;
   }
   // Where you'd work: remote roles and roles whose place we can't tell always stay.
   let otherPlace = false;
@@ -1882,6 +1905,21 @@ function noteText(note) {
   const m = /^page (changed on|unchanged since) (\d{4}-\d\d-\d\d)(.*)$/s.exec(note);
   return m ? t(m[1] === "changed on" ? "note.changed" : "note.unchanged", fmtDate(m[2])) + m[3] : note;
 }
+// What the posting asks for, read from its text (radar/requirements.py): shown as it is, never used to sort or hide.
+function reqText(req, plain = false) {
+  const parts = [], month = m => m ? `${m.slice(5)}/${m.slice(0, 4)}` : "";
+  const s = req.semester;
+  if (s) {
+    const unit = t(`req.unit.${s.unit}`);
+    parts.push(s.last ? t("req.last", unit) : s.from && s.to ? t("req.range", s.from, s.to, unit) : s.from ? t("req.from", s.from, unit) : t("req.upTo", s.to, unit));
+  }
+  if (req.graduation) parts.push(t("req.grad", month(req.graduation.from), month(req.graduation.to)));
+  if (req.english) parts.push(t("req.english", t(`req.level.${req.english.level}`), req.english.required));
+  if (req.hours) parts.push(t("req.hours", req.hours));
+  if (req.courses?.length) parts.push(t("req.courses", req.courses.join(", ")));
+  return (plain ? parts : parts.map(esc)).join(" · ");
+}
+
 function details(i) {
   const fit = i._fit;
   const m = mark(i);
@@ -1900,6 +1938,7 @@ function details(i) {
     ...(i.apply?.length ? [[t("d.apply"), `${esc(applyText(i))} <span class="muted">· ${t("d.applyNote")}</span>`]] : []),
     [t("d.deadline"), i.deadline ? esc(fmtDate(i.deadline)) : `<span class="none">${t("d.deadlineNone")}</span>`],
     [t("d.pay"), i.pay ? `<span class="mono">${esc(i.pay)}</span>${i.pay_text ? ` <span class="muted">· ${t("d.payText")}</span>` : ""}` : ns],
+    ...(Object.keys(i.req).length ? [[t("d.req"), `${reqText(i.req)} <span class="muted">· ${t("d.reqNote")}</span>`]] : []),
     [t("d.labels"), labels],
     [t("d.found"), esc(t("d.foundVia", fmtDate(i.added), srcName(i.source), i.posted ? fmtDate(i.posted) : ""))
       + (BOARD_LINKS[i.source] ? ` <a href="${BOARD_LINKS[i.source]}" target="_blank" rel="noopener">${esc(srcName(i.source))}</a>` : "") + (i.note ? `<br><span class="muted">${esc(noteText(i.note))}</span>` : "")],
@@ -1926,6 +1965,7 @@ function reportUrl(i) {
     [t("d.where"), locs.length ? locs.join(" · ") : regionNames(i).join(", ") || t("d.notStated")],
     [t("d.when"), i.season === "unknown" ? t("d.notStated") : seasonText(i.season)],
     [t("d.deadline"), i.deadline ? fmtDate(i.deadline) : t("d.notStated")],
+    ...(Object.keys(i.req).length ? [[t("d.req"), reqText(i.req, true)]] : []),
     [t("d.labels"), [...(i.area !== "other" || !(i.subs || []).length ? [tv("area", i.area)] : i.subs.map(k => t(`sub.${k}`))),
       ...i.warnings.map(w => tv("warn", w))].join(" · ")],
   ].map(([k, v]) => `- ${k}: ${v}`).join("\n");
@@ -2304,7 +2344,7 @@ fetch("data.json", { cache: "no-cache" })
   .then(r => r.json())
   .then(data => {
     // data.json leaves out empty values and defaults (radar/site.py, COMPACT_DEFAULTS): put them back.
-    data.items.forEach(i => { for (const [k, v] of Object.entries(ITEM_DEFAULTS)) if (i[k] === undefined) i[k] = Array.isArray(v) ? [] : v; });
+    data.items.forEach(i => { for (const [k, v] of Object.entries(ITEM_DEFAULTS)) if (i[k] === undefined) i[k] = Array.isArray(v) ? [] : v && typeof v === "object" ? {} : v; });
     carryMarks(data.items);
     DATA = data;
     applyLanguage();

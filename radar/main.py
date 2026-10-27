@@ -19,7 +19,7 @@ from datetime import date
 from pathlib import Path
 from typing import Any, Callable
 
-from . import counts, db, details, digest, labels, llm, notify, report, site, telegram_bot
+from . import area_guess, counts, db, details, digest, labels, llm, notify, report, site, telegram_bot
 from .config import ROOT, load_config
 from .models import Opportunity
 from .sources import (
@@ -174,6 +174,7 @@ def run(
     # 2. Label: keyword rules always; Claude on top for new items if a key is set.
     for opp in all_items:
         labels.apply_rules(opp)
+    area_guess.fill(all_items)  # a probable field for titles the rules can't place (sorting only)
     labeled_by = "keyword rules"
     if llm.enabled():
         known = db.existing_ids(conn)

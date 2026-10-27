@@ -347,6 +347,24 @@ estágios are marked remote while the text says "Modelo de trabalho: Híbrido, 4
 dias presenciais". Those count as hybrid (and stop passing as remote), and
 their location shows "(hybrid)".
 
+**What an estágio asks for** (`radar/requirements.py`). Open a Brazilian
+estágio and a "Requisitos" line shows what its text asks for: the semester ("a
+partir do 5º semestre", "do 2º ao 7º"), the expected graduation ("formatura entre
+12/2025 e 12/2027"), English (level, and whether it is required or nice to have),
+weekly hours and the courses it accepts. They are read with text patterns, no AI:
+about 6 in 10 Brazilian estágios get at least one of them, and in a hand check of
+100 values 93 were right. When a sentence is unclear the line leaves that part
+out rather than guess, and the line only informs: it doesn't sort or hide roles.
+Check the details on the job's page.
+
+**A probable field for unplaced titles** (`radar/area_guess.py`). About one role
+in six has no field, mostly titles in French, German, Swedish or Chinese that the
+word lists don't know. A small multilingual model turns each title into numbers
+that stand for its meaning, and such a role gets the fields most common among the
+10 roles with the closest titles. In a hand check about 4 in 5 were right, so the
+guess only moves a role up for students of that field ("Provavelmente uma vaga de
+Engenharia, pelo título"); it never hides a role from anyone.
+
 **Where you'd work.** Roles outside the places you picked are hidden. Remote
 roles always show, and so do roles whose place we can't tell. For "in my
 state", the bot reads the Brazilian state from each location

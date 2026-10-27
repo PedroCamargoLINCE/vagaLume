@@ -27,8 +27,15 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install .
+          pip install ".[embeddings]"  # embeddings: the field guesses (radar/area_guess.py)
           python -m playwright install --with-deps chromium  # headless browser for Meta
+
+      - name: Keep the title model between runs
+        # multilingual-e5-small, about 130 MB, for radar/area_guess.py: downloaded once, then cached.
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-multilingual-e5-small
 
       - name: Find new companies with jobs in Brazil
         # Ashby, Greenhouse and Lever boards seen by Common Crawl (radar/discover.py); the ones with jobs

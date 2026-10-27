@@ -40,6 +40,10 @@ def item_record(opp: StoredOpportunity, apply_months: list[int] | None = None) -
         "states": opp.states,
         "workplaces": opp.workplaces,
         "subs": opp.subs,
+        # requirements read from the text (radar/requirements.py) and the probable fields of a role the
+        # rules couldn't place (radar/area_guess.py): the page shows the first and sorts by the second
+        "req": getattr(opp, "req", None) or getattr(opp, "requirements", {}),
+        "guess": opp.guess,
         "posted": opp.posted_date,
         "added": opp.first_seen,
         "source": opp.source,
@@ -137,7 +141,8 @@ def shown_items(opportunities: list[StoredOpportunity], today: str, windows: dic
 # leaving them out of data.json saves about a fifth of its size.
 COMPACT_DEFAULTS: dict[str, object] = {
     "location": "", "warnings": [], "deadline": "", "pay": "", "skills": [], "fields": [], "levels": [], "states": [],
-    "workplaces": [], "subs": [], "posted": "", "note": "", "season": "unknown", "area": "other", "status": "seen",
+    "workplaces": [], "subs": [], "req": {}, "guess": [], "posted": "", "note": "", "season": "unknown", "area": "other",
+    "status": "seen",
 }
 
 

@@ -16,6 +16,7 @@ from datetime import date
 from .models import NO_DEADLINE, Opportunity
 from .pay import find_pay
 from .fields import find_fields
+from .requirements import read as read_requirements
 from .subareas import find_subareas
 from .levels import LEVELS, find_levels
 from .places import brazil_states
@@ -604,6 +605,7 @@ def apply_rules(opp: Opportunity) -> Opportunity:
     preset_levels = [level for level in LEVELS if level in (preset.get("levels") or [])]  # type: ignore[operator]
     opp.levels = preset_levels or find_levels(opp.title, opp.description)
     opp.states = brazil_states(opp.location) if "Brazil" in opp.regions else []
+    opp.requirements = read_requirements(opp.description)
     opp.labeled_by = "rules"
     return opp
 

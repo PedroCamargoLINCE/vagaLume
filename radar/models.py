@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import re
 from dataclasses import dataclass, field
+from typing import Any
 
 # Used when we could not find a deadline anywhere.
 NO_DEADLINE = "check page"
@@ -114,6 +115,12 @@ class Opportunity:
     states: list[str] = field(default_factory=list)  # Brazilian states (UFs), e.g. ["SP"]; see radar/places.py
     workplaces: list[str] = field(default_factory=list)  # remote / hybrid / on-site; see radar/workplace.py
     subs: list[str] = field(default_factory=list)  # sub-areas, e.g. ["tributario"]; see radar/subareas.py
+    # What a Brazilian estágio asks for, read from its text: semester, graduation, English, hours, courses
+    # (radar/requirements.py). Shown on the site as it is, never used to sort or hide.
+    requirements: dict[str, Any] = field(default_factory=dict)
+    # Probable fields of a role the rules could not place, from similar titles (radar/area_guess.py).
+    # Only moves the role up the list for students of that field; it never hides a role.
+    guess: list[str] = field(default_factory=list)
 
     # --- filled in by radar.db ---------------------------------------------
     first_seen: str = ""

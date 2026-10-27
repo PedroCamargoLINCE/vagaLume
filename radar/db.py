@@ -17,6 +17,7 @@ import sqlite3
 from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
+from typing import Any
 
 from .models import Opportunity
 
@@ -45,6 +46,8 @@ CREATE TABLE IF NOT EXISTS opportunities (
     states        TEXT,           -- Brazilian states, comma-separated, e.g. "SP,RJ" (radar/places.py)
     workplaces    TEXT,           -- remote / hybrid / on-site, comma-separated (radar/workplace.py)
     subs          TEXT,           -- sub-areas, comma-separated, e.g. "tributario" (radar/subareas.py)
+    req           TEXT,           -- requirements read from the text, JSON, e.g. {"semester":{"from":5}} (radar/requirements.py)
+    guess         TEXT,           -- probable fields of a role the rules couldn't place, comma-separated (radar/area_guess.py)
     area          TEXT,
     season        TEXT,
     regions       TEXT,           -- comma-separated, e.g. "Brazil,remote"
@@ -130,7 +133,7 @@ def _add_missing_columns(conn: sqlite3.Connection) -> None:
     existing = {row["name"] for row in conn.execute("PRAGMA table_info(opportunities)")}
     if "pay" not in existing:
         conn.execute("ALTER TABLE opportunities ADD COLUMN pay TEXT")
-    for column in ("pay_from", "detail_checked", "skills", "fields", "levels", "states", "workplaces", "subs"):
+    for column in ("pay_from", "detail_checked", "skills", "fields", "levels", "states", "workplaces", "subs", "req", "guess"):
         if column not in existing:
             conn.execute(f"ALTER TABLE opportunities ADD COLUMN {column} TEXT")
 
@@ -166,6 +169,8 @@ def upsert(conn: sqlite3.Connection, opp: Opportunity, today: str) -> bool:
         "location": opp.location, "remote": int(opp.remote), "url": opp.url,
         "posted_date": opp.posted_date, "deadline": opp.deadline, "pay": opp.pay, "pay_from": opp.pay_from, "detail_checked": opp.detail_checked, "skills": _join(opp.skills), "fields": _join(opp.fields),
         "levels": _join(opp.levels), "states": _join(opp.states), "workplaces": _join(opp.workplaces), "subs": _join(opp.subs),
+        "req": json.dumps(opp.requirements, ensure_ascii=False, separators=(",", ":"), sort_keys=True) if opp.requirements else "",
+        "guess": _join(opp.guess),
         "area": opp.area,
         "season": opp.season, "regions": _join(opp.regions), "warnings": _join(opp.warnings),
         "calendar_note": opp.calendar_note, "note": opp.note, "labeled_by": opp.labeled_by,
@@ -191,7 +196,7 @@ def upsert(conn: sqlite3.Connection, opp: Opportunity, today: str) -> bool:
     # Its job page was read on an earlier day but not today (radar/details.py): keep what the
     # page gave, since today's labels come from the list alone.
     if row["detail_checked"] and not opp.detail_checked:
-        for name in ("detail_checked", "pay", "pay_from", "skills", "fields", "levels", "workplaces"):
+        for name in ("detail_checked", "pay", "pay_from", "skills", "fields", "levels", "workplaces", "req"):
             values.pop(name, None)
         if opp.deadline == "check page":
             values.pop("deadline")
@@ -256,6 +261,8 @@ class StoredOpportunity:
     states: list[str]
     workplaces: list[str]
     subs: list[str]
+    req: dict[str, Any]
+    guess: list[str]
     area: str
     season: str
     regions: list[str]
@@ -276,7 +283,8 @@ def load_all(conn: sqlite3.Connection) -> list[StoredOpportunity]:
             posted_date=r["posted_date"] or "", first_seen=r["first_seen"],
             last_seen=r["last_seen"], deadline=r["deadline"] or "check page", pay=r["pay"] or "", pay_from=r["pay_from"] or "", detail_checked=r["detail_checked"] or "",
             skills=_split(r["skills"]), fields=_split(r["fields"]),
-            levels=_split(r["levels"]), states=_split(r["states"]), workplaces=_split(r["workplaces"]), subs=_split(r["subs"]), area=r["area"] or "other", season=r["season"] or "unknown",
+            levels=_split(r["levels"]), states=_split(r["states"]), workplaces=_split(r["workplaces"]), subs=_split(r["subs"]),
+            req=json.loads(r["req"]) if r["req"] else {}, guess=_split(r["guess"]), area=r["area"] or "other", season=r["season"] or "unknown",
             regions=_split(r["regions"]), warnings=_split(r["warnings"]),
             calendar_note=r["calendar_note"] or "", note=r["note"] or "",
             labeled_by=r["labeled_by"] or "rules", is_open=bool(r["is_open"]), status=r["status"],

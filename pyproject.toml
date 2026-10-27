@@ -15,6 +15,8 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
+# A probable field for roles the keyword rules can't place (radar/area_guess.py). Optional.
+embeddings = ["onnxruntime>=1.17", "tokenizers>=0.15", "huggingface_hub>=0.20", "numpy>=1.26"]
 
 [project.urls]
 Website = "https://pedrocamargolince.github.io/vagaLume/"

@@ -83,7 +83,7 @@ today's numbers):
 | **Brazil:** USP estágio murals (FFLCH) | `usp_estagios.py` | the mural's public list and each role's page | 19 (Oct 21) |
 | Remote job boards (Himalayas, Remotive, Jobicy, Remote OK, Working Nomads): internships open to people in Brazil | `remote_boards.py` | each board's public API; only roles open worldwide, to Latin America or to Brazil, credited and linked to the board | 80 + 1 (Oct 21) |
 
-Total: about **31,000<!--n:open--> open roles** a day from 45<!--n:sources--> sources, most of them in Brazil, Europe and the US.
+Total: about **32,000<!--n:open--> open roles** a day from 45<!--n:sources--> sources, most of them in Brazil, Europe and the US.
 
 **New companies, found every day** (`radar/discover.py`). Many companies, Brazilian startups
 among them, post their jobs on Ashby, Greenhouse or Lever, which vagaLume reads; it only needs to

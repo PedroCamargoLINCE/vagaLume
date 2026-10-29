@@ -644,8 +644,35 @@ blocking the bot) stops it. To turn it on, once:
 
 The subscriber list (Telegram chat ids and choices, nothing else) lives in
 `data/subscribers.enc`, encrypted: the public repository shows nothing.
-`.github/workflows/telegram.yml` reads new sign-ups every 30 minutes; it does
+`.github/workflows/telegram.yml` reads new sign-ups and answers them; it does
 nothing until the two secrets exist.
+
+**Answering sign-ups quickly.** GitHub delays scheduled workflows and skips many
+of the frequent ones: the "every 30 minutes" schedule ran every 4 to 7 hours in
+October 2026, so someone who tapped "Receber no Telegram" waited hours for an
+answer. A free outside scheduler can start the workflow every 15 minutes instead:
+
+1. On GitHub: **Settings → Developer settings → Personal access tokens →
+   Fine-grained tokens → Generate new token**. Repository access: only this
+   repository. Permissions: **Actions: Read and write** (nothing else). Pick the
+   longest expiration offered and note the date to renew it.
+2. At [cron-job.org](https://cron-job.org) (free), create a cron job:
+   - URL: `https://api.github.com/repos/<you>/<repo>/actions/workflows/telegram.yml/dispatches`
+   - Schedule: every 15 minutes
+   - Advanced → Request method: **POST**; headers
+     `Authorization: Bearer <the token>`, `Accept: application/vnd.github+json`,
+     `X-GitHub-Api-Version: 2022-11-28`; request body `{"ref":"main"}`
+3. Save, then "Test run": the answer is **204** and a new "Telegram sign-ups"
+   run shows up in the Actions tab.
+
+The schedule in the workflow stays as a fallback. Each run takes about 15
+seconds and only commits when the list changed.
+
+**Visit counts** (optional). `GOATCOUNTER` near the top of `docs/index.html` is
+the name of a free [GoatCounter](https://www.goatcounter.com) site
+(`https://<name>.goatcounter.com`): it counts page views and a few actions by
+name (a role opened, "Abrir a vaga", the résumé match, Telegram, tabs), without
+cookies or anything that identifies a person. Leave it empty to turn it off.
 
 ### Daily updates for students (public digest)
 

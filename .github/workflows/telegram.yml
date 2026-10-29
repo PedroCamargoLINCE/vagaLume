@@ -5,6 +5,10 @@ name: Telegram sign-ups
 # /parar unsubscribes. Replies right away and saves the encrypted list in
 # data/subscribers.enc. The daily run sends the highlights (radar.yml).
 # Does nothing until the TELEGRAM_BOT_TOKEN and DIGEST_KEY secrets exist.
+#
+# GitHub delays and skips frequent schedules (this one ran every 4-7 hours), so an
+# outside scheduler (cron-job.org) also starts it every 15 minutes through the API
+# (workflow_dispatch); see .github/GUIDE.md, "Answering sign-ups quickly".
 
 on:
   schedule:

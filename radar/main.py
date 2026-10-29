@@ -23,7 +23,7 @@ from . import area_guess, counts, db, details, digest, labels, llm, notify, repo
 from .config import ROOT, load_config
 from .models import Opportunity
 from .sources import (
-    SourceResult, abler, academia, amazon, ashby, ciadetalentos, ciee, ciee_editais, company_sites, eightfold, eureca,
+    SourceResult, abler, academia, amazon, ashby, ciadeestagios, ciadetalentos, ciee, ciee_editais, company_sites, eightfold, eureca,
     fapesp, github_lists, google, greenhouse, gupy, iel, inhire, lever, meta, microsoft, mudes, nextjs_sites, nvidia,
     oracle_hcm, parana, programs, quickin, recrutei, remote_boards, rss_jobs, shopee, smartrecruiters, solides,
     successfactors, superestagios, totvs_rh, usp_estagios, workday,
@@ -56,6 +56,7 @@ SOURCES: dict[str, Callable[[dict[str, Any], sqlite3.Connection, str], SourceRes
     "superestagios": lambda cfg, conn, today: superestagios.fetch(cfg),
     "iel": lambda cfg, conn, today: iel.fetch(cfg),
     "ciadetalentos": lambda cfg, conn, today: ciadetalentos.fetch(cfg),
+    "ciadeestagios": lambda cfg, conn, today: ciadeestagios.fetch(cfg),
     "fapesp": lambda cfg, conn, today: fapesp.fetch(cfg),
     "smartrecruiters": lambda cfg, conn, today: smartrecruiters.fetch(cfg),
     "workday": lambda cfg, conn, today: workday.fetch(cfg),

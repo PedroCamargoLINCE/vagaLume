@@ -980,7 +980,7 @@ const PLACE_PT = [[/\bBrazil\b/g, "Brasil"], [/\(on-site\)/g, "(presencial)"], [
 const placeText = text => LANG === "pt" ? PLACE_PT.reduce((out, [re, to]) => out.replace(re, to), text) : text;
 // Source keys -> the names people know (Sources table, source filter, "Found" line).
 const SOURCE_NAMES = { github_lists: "GitHub lists", gupy: "Gupy", ciee: "CIEE", superestagios: "Super Estágios", solides: "Sólides",
-  iel: "IEL", ciadetalentos: "Cia de Talentos", fapesp: "FAPESP", programs: "programs", greenhouse: "Greenhouse", lever: "Lever",
+  iel: "IEL", ciadetalentos: "Cia de Talentos", ciadeestagios: "Companhia de Estágios", fapesp: "FAPESP", programs: "programs", greenhouse: "Greenhouse", lever: "Lever",
   ashby: "Ashby", smartrecruiters: "SmartRecruiters", workday: "Workday", google: "Google", amazon: "Amazon", nvidia: "NVIDIA",
   microsoft: "Microsoft", deshaw: "D. E. Shaw", drw: "DRW", meta: "Meta", eureca: "Eureca", abler: "Abler", oracle_hcm: "Oracle",
   rss_jobs: "RSS", inhire: "InHire", eightfold: "Eightfold", bcg: "BCG", goldman: "Goldman Sachs", ibm: "IBM", totvs_rh: "TOTVS",

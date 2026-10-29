@@ -346,12 +346,6 @@ programs:
     url: https://www.raizen.com.br/programas-de-talentos
     regions: [Brazil]
 
-  - name: Companhia de Estágios, programas abertos
-    org: Companhia de Estágios
-    url: https://www.ciadeestagios.com.br/vagas-de-estagio/
-    regions: [Brazil]
-    notes: "estágio programs of big companies (e.g. Boeing, Stellantis, Danone, Pirelli); each lists its deadline"
-
   # --- Summer research abroad open to students from Brazil (checked 2026-10-15) ---
   - name: CERN Summer Student Programme
     org: CERN

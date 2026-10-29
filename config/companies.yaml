@@ -171,6 +171,8 @@ greenhouse:
   - {slug: cabify, name: Cabify}                              # Spain, Colombia
   - {slug: getyourguide, name: GetYourGuide}                  # Switzerland
   - {slug: dataiku, name: Dataiku}                            # France
+  - {slug: andurilindustries, name: Anduril}
+  - {slug: ripple, name: Ripple}
 lever:
   - {slug: solopulseco, name: SoloPulse}
   - {slug: palantir, name: Palantir}
@@ -212,6 +214,7 @@ ashby:
   - {slug: perplexity, name: Perplexity}
   - {slug: thinkingmachines, name: Thinking Machines Lab}
   - {slug: cursor, name: Cursor (Anysphere)}
+  - {slug: Crusoe, name: Crusoe}
   - {slug: elevenlabs, name: ElevenLabs}
   - {slug: harvey, name: Harvey}
   - {slug: sierra, name: Sierra}
@@ -449,6 +452,7 @@ workday_global:
   - {tenant: airproducts, wd: 5, site: AP0001, name: Air Products}              # ~18: US, Brazil, Spain (title searches)
   - {tenant: bristolmyerssquibb, wd: 5, site: BMS, name: Bristol Myers Squibb}  # ~17: US
   - {tenant: huntsman, wd: 1, site: Huntsman, name: Huntsman}                   # ~17: US, Costa Rica, Malaysia, Germany
+  - {tenant: blueorigin, wd: 5, site: BlueOrigin, name: Blue Origin}
 
 # InHire job boards (radar/sources/inhire.py): tenant = the subdomain of <tenant>.inhire.app.
 # Checked 2026-10-16; student roles that day.
@@ -461,6 +465,8 @@ inhire:
   - {tenant: contabilizei, name: Contabilizei}  # 1
   - {tenant: cielo, name: Cielo}                # 0 that day (215 jobs)
   - {tenant: xp, name: XP Inc.}                 # 0 that day
+  - {tenant: qitech, name: QI Tech}
+  - {tenant: remessaonline, name: Remessa Online}
   # - {tenant: bradesco, name: Bradesco}        # tenant exists but only a test job
 
 # Eightfold "PCSX" career sites (radar/sources/eightfold.py). location narrows to a country;

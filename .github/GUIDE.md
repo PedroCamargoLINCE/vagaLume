@@ -47,7 +47,7 @@ today's numbers):
 | Ashby boards (63 companies, incl. Doctolib, Back Market, Enpal) | `ashby.py` | public JSON API | 98 |
 | GitHub lists (SimplifyJobs Summer 2027, Off-Season, New Grad; vanshb03 Summer 2027; Tech Internships Europe; Canadian Tech Internships 2027) | `github_lists.py` | parses README tables (HTML and Markdown) | 3,898 + ~740 Europe/Canada (Oct 15) |
 | Gupy (estágio, estágio de férias and trainee in Brazil) | `gupy.py` | the portal's JSON search API, filtered by job type, 100 per page; also "estágio"/"estagiário" titles that companies file as talent pools or regular jobs (Itaú's estágio program is one) | 3,226 (Oct 15) |
-| Program pages (93<!--n:programs--> pages, 40<!--n:programs_brazil--> of them Brazilian) | `programs.py` | page-change watcher | 93<!--n:programs--> |
+| Program pages (92<!--n:programs--> pages, 39<!--n:programs_brazil--> of them Brazilian) | `programs.py` | page-change watcher | 92<!--n:programs--> |
 | Google Careers | `google.py` | reads the job data embedded in the results page | 90 |
 | Amazon Jobs | `amazon.py` | JSON endpoint behind amazon.jobs search | 431 |
 | NVIDIA (Workday) | `nvidia.py` | Workday JSON endpoint, "Intern" filter | 40 |
@@ -83,7 +83,7 @@ today's numbers):
 | **Brazil:** USP estágio murals (FFLCH) | `usp_estagios.py` | the mural's public list and each role's page | 19 (Oct 21) |
 | Remote job boards (Himalayas, Remotive, Jobicy, Remote OK, Working Nomads): internships open to people in Brazil | `remote_boards.py` | each board's public API; only roles open worldwide, to Latin America or to Brazil, credited and linked to the board | 80 + 1 (Oct 21) |
 
-Total: about **32,000<!--n:open--> open roles** a day from 45<!--n:sources--> sources, most of them in Brazil, Europe and the US.
+Total: about **32,000<!--n:open--> open roles** a day from 46<!--n:sources--> sources, most of them in Brazil, Europe and the US.
 
 **New companies, found every day** (`radar/discover.py`). Many companies, Brazilian startups
 among them, post their jobs on Ashby, Greenhouse or Lever, which vagaLume reads; it only needs to

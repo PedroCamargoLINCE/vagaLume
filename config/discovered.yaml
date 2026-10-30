@@ -212,7 +212,6 @@ greenhouse:
   - {name: Inflect, slug: inflect}  # 3 jobs in Brazil, 0 for students (2026-10-27)
   - {name: Launch Potato, slug: launch2}  # 3 jobs in Brazil, 0 for students (2026-10-27)
   - {name: Newsela, slug: newsela}  # 3 jobs in Brazil, 0 for students (2026-10-27)
-  - {name: 'Ripple ', slug: ripple}  # 3 jobs in Brazil, 0 for students (2026-10-27)
   - {name: RTB House, slug: rtbhouse}  # 3 jobs in Brazil, 0 for students (2026-10-27)
   - {name: Sporty Group, slug: sportygroup}  # 3 jobs in Brazil, 0 for students (2026-10-27)
   - {name: Syndigo, slug: syndigo}  # 3 jobs in Brazil, 0 for students (2026-10-27)

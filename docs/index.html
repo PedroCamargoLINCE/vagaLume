@@ -906,19 +906,35 @@ const STRINGS = {
 <p><b>Pay</b> appears when the posting states it (hr = per hour, mo = per month, yr = per year).</p>
 <p><b>The areas you're looking for</b> (not only your course: an engineering student can pick Business too) hide the roles clearly meant for other areas (a law estágio if you didn't pick Law, for example); roles that don't say which area they want always stay. "Show roles outside your profile", under the number of roles or in the filters, brings them back. Related areas are shown together: engineering, computing and the exact sciences, for example.</p>
 <p><b>☆ Save</b> builds a shortlist and <b>✕ Hide</b> (it appears when you point at a row, and inside an opened row) removes a role from your lists; inside a row you can also mark it <b>Applied</b>. All of this stays in this browser. Apart from other fields, vagaLume doesn't hide anything by itself: labels and fit are hints, not verdicts.</p>
-<p>Your filters live in the page address, so you can bookmark a view (for example "ML roles in Europe") or send it to a friend.</p>`,
+<p>Your filters live in the page address, so you can bookmark a view (for example "ML roles in Europe") or send it to a friend.</p>
+<p><b>Visits</b> are counted with GoatCounter, without cookies and without anything that identifies you: the page, the site you came from, your country, screen size, and a few actions by name (opened a role, used the résumé match). Your searches, filters and résumé stay in this browser.</p>`,
 `<p><b>Perfil</b> compara cada vaga com as suas respostas: ponto cheio é uma boa opção, ponto pela metade pede para conferir algo antes (visto, regra de ano de formatura, vaga para depois de formado), ponto vazio é pouco provável (por exemplo, vaga só para doutorado e você está na graduação). O motivo aparece embaixo da empresa; abra a vaga para ver todos.</p>
 <p><b>Currículo</b> compara as habilidades que a vaga cita (Python, Excel, CLP, Direito tributário…), a área e o título com o resumo que a sua IA fez do seu currículo. As vagas que combinam muito ou bem ganham uma etiqueta; abra a vaga para ver quais habilidades batem e quais faltam. É uma comparação por palavras-chave, então leia a vaga antes de decidir.</p>
 <p><b>Quando</b> é uma tirinha de janeiro a dezembro. <i class="swatch" style="background:var(--semester)"></i> meses de aula: os semestres habituais no Brasil (mar–jun, ago–nov), ou os meses que o resumo do seu currículo não lista como livres. <i class="swatch" style="background:var(--good)"></i> a vaga cai nas férias. <i class="swatch" style="background:var(--check)"></i> ela bate com as aulas.</p>
 <p><b>Remuneração</b> aparece quando a vaga informa (hr = por hora, mo = por mês, yr = por ano).</p>
 <p><b>As áreas em que você procura vagas</b> (não só o seu curso: quem faz Engenharia pode marcar Negócios também) ocultam as vagas claramente de outras áreas (um estágio de Direito, se você não marcou Direito, por exemplo); vagas que não dizem a área ficam sempre visíveis. "Mostrar vagas fora do seu perfil", embaixo do número de vagas ou nos filtros, traz tudo de volta. Áreas próximas aparecem juntas: Engenharia, Computação e Exatas, por exemplo.</p>
 <p><b>☆ Salvar</b> monta a sua lista e <b>✕ Ocultar</b> (aparece ao apontar para a vaga, e dentro da vaga aberta) tira uma vaga das suas listas; dentro da vaga você também pode marcar <b>Já me candidatei</b>. Tudo isso fica neste navegador. Fora o que está fora do seu perfil, o vagaLume não oculta nada sozinho: rótulos e avisos são dicas, não veredictos.</p>
-<p>Os filtros ficam no endereço da página, então dá para salvar uma visão (por exemplo "vagas de ML na Europa") ou mandar para um amigo.</p>`],
+<p>Os filtros ficam no endereço da página, então dá para salvar uma visão (por exemplo "vagas de ML na Europa") ou mandar para um amigo.</p>
+<p><b>Visitas</b> são contadas com o GoatCounter, sem cookies e sem nada que identifique você: a página, o site de onde você veio, o país, o tamanho da tela e algumas ações pelo nome (abriu uma vaga, usou a comparação de currículo). As suas buscas, filtros e currículo ficam neste navegador.</p>`],
   "sources.title": ["Sources", "Fontes"], "src.github": ["GitHub lists", "listas do GitHub"], "src.programs": ["program pages", "páginas de programas"], "sources.source": ["Source", "Fonte"], "sources.status": ["Status", "Situação"], "status.ok": ["ok", "ok"], "status.partial": ["partial", "parcial"], "status.failed": ["failed", "falhou"],
   "sources.items": ["Items", "Itens"], "sources.problems": ["Problems", "Problemas"],
   "footer.daily": ["vagaLume updates once a day.", "O vagaLume atualiza uma vez por dia."],
   "footer.code": ["Code, guide and how to add companies", "Código, guia e como adicionar empresas"],
 };
+// Visit counts with GoatCounter (goatcounter.com): no cookies, nothing that identifies a person. It counts
+// page views and a few actions by name only (track() below); searches, filters and the résumé never leave
+// this browser. Empty = off. Only counted on the published site, not on a copy opened locally.
+const GOATCOUNTER = "vagalume";  // the name chosen at goatcounter.com: https://<name>.goatcounter.com
+if (GOATCOUNTER && location.hostname.endsWith("github.io")) {
+  const counter = document.createElement("script");
+  counter.async = true;
+  counter.dataset.goatcounter = `https://${GOATCOUNTER}.goatcounter.com/count`;
+  counter.src = "https://gc.zgo.at/count.js";
+  document.head.appendChild(counter);
+}
+function track(action) {  // "vaga-aberta", "telegram"...: the action's name, nothing about the person or the role
+  try { window.goatcounter?.count?.({ path: `acao/${action}`, title: action, event: true }); } catch {}
+}
 const store = {
   get(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; } },
   set(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} },
@@ -1554,6 +1570,7 @@ function profileChanges(next) {
 }
 
 function showResume() {
+  track("curriculo");
   $("app").hidden = true;
   $("welcome").hidden = true;
   $("resume").hidden = false;
@@ -2256,6 +2273,8 @@ function setLanguage(lang) {
 
 // ------------------------------------------------------------------ events
 document.addEventListener("click", e => {
+  if (e.target.closest(".primary-link")) track("abrir-vaga");
+  if (e.target.closest('a[href*="t.me/"]')) track("telegram");
   const langBtn = e.target.closest("[data-lang]");
   if (langBtn) return setLanguage(langBtn.dataset.lang);
   if (e.target.closest("#legend-btn")) return toggleLegend($("legend").hidden);
@@ -2275,7 +2294,7 @@ document.addEventListener("click", e => {
   const chip = e.target.closest(".chip");
   if (chip) { togglePick(chip.parentElement.dataset.filter, chip.dataset.value); return rerender(); }
   const tab = e.target.closest(".tab");
-  if (tab) { view.tab = tab.dataset.tab; return rerender(); }
+  if (tab) { view.tab = tab.dataset.tab; track(`aba-${view.tab}`); return rerender(); }
   if (e.target.closest("[data-tab-all]")) { view.tab = "all"; return rerender(); }
   const others = e.target.closest("[data-others]");
   if (others) { view.others = others.dataset.others; return rerender(); }
@@ -2294,7 +2313,7 @@ document.addEventListener("click", e => {
     const item = DATA.items.find(i => i.id === id);
     if (act.dataset.act === "save") toggleSave(id);
     if (act.dataset.act === "hide") setMark(item, "hidden");
-    if (act.dataset.act === "applied") setMark(item, "applied");
+    if (act.dataset.act === "applied") { setMark(item, "applied"); track("candidatei"); }
     return render();
   }
   if (e.target.closest("a")) return;  // links open the posting
@@ -2302,7 +2321,8 @@ document.addEventListener("click", e => {
   const toggle = e.target.closest("[data-toggle]");
   if (toggle) {
     const id = toggle.closest(".row").dataset.id;
-    view.open.has(id) ? view.open.delete(id) : view.open.add(id);
+    if (view.open.has(id)) view.open.delete(id);
+    else { view.open.add(id); track("vaga-aberta"); }
     render();
   }
 });
